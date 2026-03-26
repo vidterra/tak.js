@@ -2,18 +2,16 @@ const path = require('path')
 const protobuf = require('protobufjs')
 const xmljs = require('xml-js')
 
-let TakMessage = null
+const root = protobuf.loadSync(path.join(__dirname, '../assets/takmessage.proto'))
+const TakMessage = root.lookupType("atakmap.commoncommo.protobuf.v1.TakMessage")
 
 exports.proto2js = (message) => {
 	if (typeof message === 'undefined' || message === null) {
 		throw new Error('Attempted to parse empty TAK proto message')
 	}
 
-	if (typeof message !== Buffer) {
-		message = Buffer.from(message, 'hex')
-	}
-
-	const result = TakMessage.decode(message)
+	const buf = Buffer.from(message, 'hex')
+	const result = TakMessage.decode(buf)
 	return TakMessage.toObject(result, {
 		longs: String,
 	}) // or decode
@@ -35,9 +33,9 @@ exports.protojs2cotjs = (proto) => {
 			},
 			"point": {
 				"_attributes": {
-					"lat": proto.cotEvent.lat,
-					"lon": proto.cotEvent.lon,
-					"hae": proto.cotEvent.hae,
+					"lat": proto.cotEvent.lat ?? 0,
+					"lon": proto.cotEvent.lon ?? 0,
+					"hae": proto.cotEvent.hae ?? 0,
 					"ce": proto.cotEvent.ce,
 					"le": proto.cotEvent.le
 				}
@@ -105,6 +103,3 @@ exports.protojs2cotjs = (proto) => {
 	}
 	return cot
 }
-
-const root = protobuf.loadSync(path.join(__dirname, '../assets/takmessage.proto'))
-TakMessage = root.lookupType("atakmap.commoncommo.protobuf.v1.TakMessage")
