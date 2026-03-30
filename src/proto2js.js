@@ -64,7 +64,13 @@ exports.protojs2cotjs = (proto) => {
 			//todo add phone
 		}
 		if (proto.cotEvent.detail.xmlDetail) {
-			const result = xmljs.xml2js(proto.cotEvent.detail.xmlDetail, {compact: true})
+			let result
+			try {
+				result = xmljs.xml2js(proto.cotEvent.detail.xmlDetail, {compact: true})
+			} catch { // TAK 5.6 sends a rootless XML fragment
+				const rootNode = `<detail>${proto.cotEvent.detail.xmlDetail}</detail>`
+				result = xmljs.xml2js(rootNode, {compact: true}).detail
+			}
 			cot.event.detail = {
 				...cot.event.detail,
 				...result
